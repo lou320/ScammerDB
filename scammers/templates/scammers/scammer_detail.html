@@ -1,0 +1,202 @@
+{% extends 'scammers/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ scammer.names.first.name|default:"Scammer Details" }}</h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                {% if scammer.names.all %}
+                <h5>Names:</h5>
+                <ul>
+                    {% for name in scammer.names.all %}
+                        <li>{{ name.name }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if display_phone_numbers %}
+                <h5>Phone Numbers:</h5>
+                <ul>
+                    {% for item in display_phone_numbers %}
+                        <li>{{ item.value }} {% if item.is_masked %}<i class="fas fa-lock text-muted"></i>{% endif %}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if display_emails %}
+                <h5>Emails:</h5>
+                <ul>
+                    {% for item in display_emails %}
+                        <li>{{ item.value }} {% if item.is_masked %}<i class="fas fa-lock text-muted"></i>{% endif %}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if display_websites %}
+                <h5>Websites:</h5>
+                <ul>
+                    {% for item in display_websites %}
+                        <li><a href="{{ item.value }}" target="_blank">{{ item.value }}</a> {% if item.is_masked %}<i class="fas fa-lock text-muted"></i>{% endif %}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if display_payment_accounts %}
+                <h5>{% trans "Payment Accounts" %}:</h5>
+                <ul>
+                    {% for item in display_payment_accounts %}
+                        <li>{{ item.value }} {% if item.is_masked %}<i class="fas fa-lock text-muted"></i>{% endif %}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {% if scammer.tags.all %}
+                <h5>Tags:</h5>
+                <p>
+                    {% for tag in scammer.tags.all %}
+                        <a href="{% url 'scammer_list' %}?q=tag:{{ tag.name }}" class="badge bg-primary text-decoration-none">{{ tag.name }}</a>
+                    {% endfor %}
+                </p>
+                {% endif %}
+
+                {% if scammer.description %}
+                <h5>Description:</h5>
+                <p>{{ scammer.description }}</p>
+                {% endif %}
+
+                {% if display_images %}
+                <hr>
+                <h5>Images:</h5>
+                <div class="row">
+                    {% for item in display_images %}
+                    <div class="col-6 col-md-4 mb-3">
+                        {% if not item.is_masked %}
+                            <a href="#" class="lightbox-trigger" data-image-url="{{ item.url }}">
+                                <img src="{{ item.url }}" alt="Scammer Image" class="img-fluid">
+                            </a>
+                        {% else %}
+                            <img src="{{ item.url }}" alt="Purchase to view" class="img-fluid">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+
+                {% endif %}
+            </div>
+        </div>
+        <hr>
+        <div class="mt-3 d-flex justify-content-between align-items-center">
+            <div>
+                {% if not has_access %}
+                    <a href="{% url 'purchase_access' pk=scammer.pk %}" class="btn btn-primary">{% trans "Purchase Access" %}</a>
+                {% endif %}
+                {% if user.is_staff %}
+                    {% if scammer.status == 'pending' %}
+                        <a href="{% url 'approve_scammer' pk=scammer.pk %}" class="btn btn-success">Approve</a>
+                        <a href="{% url 'reject_scammer' pk=scammer.pk %}" class="btn btn-danger">Reject</a>
+                    {% elif scammer.status == 'approved' %}
+                        <a href="{% url 'reject_scammer' pk=scammer.pk %}" class="btn btn-danger">Reject</a>
+                    {% elif scammer.status == 'rejected' %}
+                        <a href="{% url 'approve_scammer' pk=scammer.pk %}" class="btn btn-success">Approve</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% if from_page == 'pending' %}{% url 'pending_scammers' %}{% else %}{% url 'scammer_list' %}{% endif %}" class="btn btn-secondary">{% trans "Back to List" %}</a>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        {% trans "Added on:" %} {{ scammer.created_at|date:"F d, Y" }}
+    </div>
+</div>
+
+<!-- Related Scammers Card -->
+{% if related_data %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h5><i class="fas fa-link"></i> {% trans "Related Cases" %}</h5>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for item in related_data %}
+            <a href="{% url 'scammer_detail' pk=item.scammer.pk %}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">{{ item.scammer.names.first.name|default:"(No Name)" }}</h6>
+                    <small class="text-muted">{% trans "Added on:" %} {{ item.scammer.created_at|date:"Y-m-d" }}</small>
+                </div>
+                <div class="mt-1">
+                    {% for reason in item.reasons %}
+                        <span class="badge bg-warning text-dark me-1">{{ reason }}</span>
+                    {% endfor %}
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div id="customLightbox" class="custom-lightbox">
+    <span class="close-button">&times;</span>
+    <img class="lightbox-content" id="lightboxImage" src="" alt="Full Image">
+    <a class="prev-button">&#10094;</a>
+    <a class="next-button">&#10095;</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const customLightbox = document.getElementById('customLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const closeButton = document.querySelector('.close-button');
+    const prevButton = document.querySelector('.prev-button');
+    const nextButton = document.querySelector('.next-button');
+    const lightboxTriggers = document.querySelectorAll('.lightbox-trigger');
+
+    let imageURLs = [];
+    let currentIndex = 0;
+
+    // Collect all image URLs
+    lightboxTriggers.forEach(trigger => {
+        imageURLs.push(trigger.dataset.imageUrl);
+    });
+
+    lightboxTriggers.forEach((trigger, index) => {
+        trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            currentIndex = index;
+            lightboxImage.src = imageURLs[currentIndex];
+            customLightbox.classList.add('active');
+        });
+    });
+
+    closeButton.addEventListener('click', function () {
+        customLightbox.classList.remove('active');
+    });
+
+    prevButton.addEventListener('click', function () {
+        currentIndex = (currentIndex > 0) ? currentIndex - 1 : imageURLs.length - 1;
+        lightboxImage.src = imageURLs[currentIndex];
+    });
+
+    nextButton.addEventListener('click', function () {
+        currentIndex = (currentIndex < imageURLs.length - 1) ? currentIndex + 1 : 0;
+        lightboxImage.src = imageURLs[currentIndex];
+    });
+
+    // Close lightbox on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && customLightbox.classList.contains('active')) {
+            customLightbox.classList.remove('active');
+        }
+    });
+});
+</script>
+{% endblock %}
+

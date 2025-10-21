@@ -1,0 +1,176 @@
+{% load pwa %}
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% trans "Scammer Database" %}</title>
+    {% progressive_web_app_meta %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-custom-red">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'scammer_list' %}">{% trans "Scammer DB" %}</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                                        <div class="collapse navbar-collapse" id="navbarNav">
+                                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="{% url 'add_scammer' %}">{% trans "Add Scammer" %}</a>
+                                                </li>
+                                                {% if user.is_staff %}
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="{% url 'pending_scammers' %}">{% trans "Pending Scammers" %}</a>
+                                                </li>
+                                                {% endif %}
+                                                <li class="nav-item dropdown">
+                                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        {% trans "Language" %}
+                                                    </a>
+                                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                                        {% get_current_language as LANGUAGE_CODE %}
+                                                        {% get_language_info_list for settings.LANGUAGES as languages %}
+                                                        {% for language in languages %}
+                                                            <li>
+                                                                <form action="{% url 'set_language' %}" method="post" class="d-inline">{% csrf_token %}
+                                                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                                    <input type="hidden" name="language" value="{{ language.code }}">
+                                                                    <button type="submit" class="dropdown-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
+                                                                        {{ language.name_local }}
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                            
+                                            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                                                {% if user.is_authenticated %}
+                                                    <li class="nav-item">
+                                                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-link nav-link" style="padding: 0; border: none; background: none; font-weight: bold; color: #fff !important;">{% trans "Logout" %}</button>
+                                                        </form>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" href="{% url 'register' %}">{% trans "Register" %}</a>
+                                                    </li>
+                                                {% endif %}
+                                            </ul>
+                                            <form class="d-none d-lg-flex ms-lg-2" action="{% url 'scammer_list' %}" method="get" id="search-form-desktop">
+                                                <input type="hidden" name="search_field" id="search-field-desktop" value="all">
+                                                <div class="input-group">
+                                                    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="search-filter-button-desktop">{% trans "All" %}</button>
+                                                    <ul class="dropdown-menu" id="search-filter-menu-desktop">
+                                                        <li><a class="dropdown-item" href="#" data-filter="all">{% trans "All" %}</a></li>
+                                                        <li><a class="dropdown-item" href="#" data-filter="name">{% trans "Name" %}</a></li>
+                                                        <li><a class="dropdown-item" href="#" data-filter="phone">{% trans "Phone Number" %}</a></li>
+                                                        <li><a class="dropdown-item" href="#" data-filter="email">{% trans "Email" %}</a></li>
+                                                        <li><a class="dropdown-item" href="#" data-filter="website">{% trans "Website" %}</a></li>
+                                                        <li><a class="dropdown-item" href="#" data-filter="tag">{% trans "Tag" %}</a></li>
+                                                    </ul>
+                                                    <i class="fas fa-search search-icon"></i>
+                                                    <input class="form-control" type="search" placeholder="{% trans "Search" %}" aria-label="{% trans "Search" %}" name="q" id="search-input-desktop">
+                                                </div>
+                                            </form>
+                                        </div>            </div>
+        </nav>                
+                <div class="d-lg-none bg-custom-red p-3">
+                <form action="{% url 'scammer_list' %}" method="get" id="search-form-mobile">
+                    <input type="hidden" name="search_field" id="search-field-mobile" value="all">
+                    <div class="input-group">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="search-filter-button-mobile">{% trans "All" %}</button>
+                        <ul class="dropdown-menu" id="search-filter-menu-mobile">
+                            <li><a class="dropdown-item" href="#" data-filter="all">{% trans "All" %}</a></li>
+                            <li><a class="dropdown-item" href="#" data-filter="name">{% trans "Name" %}</a></li>
+                            <li><a class="dropdown-item" href="#" data-filter="phone">{% trans "Phone Number" %}</a></li>
+                            <li><a class="dropdown-item" href="#" data-filter="email">{% trans "Email" %}</a></li>
+                            <li><a class="dropdown-item" href="#" data-filter="website">{% trans "Website" %}</a></li>
+
+                            <li><a class="dropdown-item" href="#" data-filter="tag">{% trans "Tag" %}</a></li>
+                        </ul>
+                        <i class="fas fa-search search-icon"></i>
+                        <input class="form-control" type="search" placeholder="{% trans "Search" %}" aria-label="{% trans "Search" %}" name="q" id="search-input-mobile">
+                    </div>
+                </form>
+                </div>
+                
+                <div class="main-content-area content-wrap">
+                <div class="main-content-wrapper py-4">
+                <div class="container">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+                </div>
+                </div>
+
+                <div class="container py-4">
+                    <div class="text-center p-3 bg-custom-red text-light rounded">
+                        <h4 class="privacy-heading"><i class="fas fa-shield-alt"></i> {% trans "Your Privacy is Protected" %}</h4>
+                        <p class="lead">
+                            {% trans "When you add a scammer, your submission is fully anonymous. We do not collect or store any personal information from your device or browser. Our goal is to protect the community, and that includes protecting your privacy." %}
+                        </p>
+                    </div>
+                </div>
+                
+                <footer class="footer mt-auto py-3 bg-custom-red text-light">
+                <div class="container text-center">
+                <span>&copy; 2025 {% trans "Scammer DB" %}. {% trans "All rights reserved." %}</span>
+                </div>
+                </footer>
+                
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    function setupSearchForm(formId, filterMenuId, inputId, filterButtonId, searchFieldId) {
+                        const searchFilterMenu = document.getElementById(filterMenuId);
+                        const searchInput = document.getElementById(inputId);
+                        const searchFilterButton = document.getElementById(filterButtonId);
+                        const searchField = document.getElementById(searchFieldId);
+                
+                        if (searchFilterMenu) {
+                            searchFilterMenu.addEventListener('click', function(e) {
+                                if (e.target.tagName === 'A') {
+                                    const filterValue = e.target.dataset.filter;
+                                    const filterText = e.target.textContent;
+                                    searchFilterButton.textContent = filterText;
+                                    searchField.value = filterValue;
+                
+                                    if (filterValue === 'all') {
+                                        searchInput.placeholder = '{% filter escapejs %}{% trans "Search" %}{% endfilter %}';
+                                    } else {
+                                        searchInput.placeholder = `{% filter escapejs %}{% trans "Search by" %}{% endfilter %} ${filterText}`;
+                                    }
+                                    searchInput.focus();
+                                }
+                            });
+                        }
+                    }
+                
+                    setupSearchForm('search-form-desktop', 'search-filter-menu-desktop', 'search-input-desktop', 'search-filter-button-desktop', 'search-field-desktop');
+                    setupSearchForm('search-form-mobile', 'search-filter-menu-mobile', 'search-input-mobile', 'search-filter-button-mobile', 'search-field-mobile');
+                
+                    const searchIcons = document.querySelectorAll('.search-icon');
+                    searchIcons.forEach(function(icon) {
+                        icon.addEventListener('click', function() {
+                            this.closest('form').submit();
+                        });
+                    });
+                });
+                </script>
+                {% block extra_js %}{% endblock %}
+                </body>
+                </html>

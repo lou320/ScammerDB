@@ -1,0 +1,341 @@
+{% extends 'scammers/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<h2 class="{% if request.LANGUAGE_CODE == 'my' %}burmese-heading{% endif %}">{% trans "Add Scammer Details" %}</h2>
+<br>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Default Fields -->
+    <div id="name-formset">
+        {{ name_formset.management_form }}
+        {% for form in name_formset %}
+            <div class="formset-row name-form mb-2">
+                {{ form.id }}
+                <div class="delete-checkbox" style="display:none;">{{ form.DELETE }}</div>
+                <div class="input-group">
+                    {{ form.name }}
+                    <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3 mt-3">
+        <input type="text" name="tags" class="form-control" placeholder="{% trans "Add tags" %}" id="id_tags" value="{{ form.tags.value|default:'' }}">
+    </div>
+
+    <!-- Containers for dynamically added fields -->
+    <div id="phone-formset">
+        {{ phone_formset.management_form }}
+        {% for form in phone_formset %}
+            <div class="formset-row phone-form mb-2">
+                {{ form.id }}
+                <div class="delete-checkbox" style="display:none;">{{ form.DELETE }}</div>
+                <div class="input-group">
+                    {{ form.phone_number.0 }} <!-- Country Code Select -->
+                    {{ form.phone_number.1 }} <!-- Phone Number Input -->
+                    <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div id="email-formset">
+        {{ email_formset.management_form }}
+        {% for form in email_formset %}{% if form.instance.pk %}
+            <div class="formset-row email-form mb-2">
+                {{ form.id }}
+                <div class="delete-checkbox" style="display:none;">{{ form.DELETE }}</div>
+                <div class="input-group">
+                    {{ form.email }}
+                    <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        {% endif %}{% endfor %}
+    </div>
+    <div id="website-formset">
+        {{ website_formset.management_form }}
+        {% for form in website_formset %}{% if form.instance.pk %}
+            <div class="formset-row website-form mb-2">
+                {{ form.id }}
+                <div class="delete-checkbox" style="display:none;">{{ form.DELETE }}</div>
+                <div class="input-group">
+                    {{ form.website }}
+                    <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        {% endif %}{% endfor %}
+    </div>
+    <div id="image-formset">
+        {{ image_formset.management_form }}
+        {% for form in image_formset %}{% if form.instance.pk %}
+            <div class="formset-row image-form mb-2">
+                {{ form.id }}
+                <div class="delete-checkbox" style="display:none;">{{ form.DELETE }}</div>
+                <div class="input-group">
+                    {{ form.image }}
+                    <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        {% endif %}{% endfor %}
+    </div>
+
+    <div id="payment-account-formset">
+        {{ payment_account_formset.management_form }}
+        {% for form in payment_account_formset %}{% if form.instance.pk %}
+            <div class="formset-row payment-account-form mb-2">
+                {{ form.id }}
+                <div class="delete-checkbox" style="display:none;">{{ form.DELETE }}</div>
+                <div class="input-group">
+                    {{ form.account_number }}
+                    <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        {% endif %}{% endfor %}
+    </div>
+
+
+
+    <div class="mb-3 mt-3">
+        {{ form.description }}
+    </div>
+
+    <hr>
+    <button type="submit" class="btn btn-danger">{% trans "Save Scammer" %}</button>
+    <a href="{% url 'scammer_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+</form>
+
+<!-- Floating Action Button -->
+<div class="fab-container">
+    <div class="fab-menu" id="fab-menu">
+        <div class="fab-menu-item" data-form-type="name">
+            <span class="fab-label">{% trans "Name" %}</span>
+            <button type="button" class="btn btn-info btn-sm"><i class="fas fa-user-plus"></i></button>
+        </div>
+        <div class="fab-menu-item" data-form-type="phone">
+            <span class="fab-label">{% trans "Phone Number" %}</span>
+            <button type="button" class="btn btn-info btn-sm"><i class="fas fa-phone"></i></button>
+        </div>
+        <div class="fab-menu-item" data-form-type="email">
+            <span class="fab-label">{% trans "Email" %}</span>
+            <button type="button" class="btn btn-info btn-sm"><i class="fas fa-envelope"></i></button>
+        </div>
+        <div class="fab-menu-item" data-form-type="website">
+            <span class="fab-label">{% trans "Website" %}</span>
+            <button type="button" class="btn btn-info btn-sm"><i class="fas fa-globe"></i></button>
+        </div>
+        <div class="fab-menu-item" data-form-type="image">
+            <span class="fab-label">{% trans "Image" %}</span>
+            <button type="button" class="btn btn-info btn-sm"><i class="fas fa-image"></i></button>
+        </div>
+        <div class="fab-menu-item" data-form-type="payment_account">
+            <span class="fab-label">{% trans "Payment Account" %}</span>
+            <button type="button" class="btn btn-info btn-sm"><i class="fas fa-money-check-alt"></i></button>
+        </div>
+
+    </div>
+    <button type="button" class="btn btn-danger rounded-circle fab" id="fab-toggle">
+        <i class="fas fa-plus"></i>
+    </button>
+</div>
+
+
+<!-- Empty Forms (for cloning) -->
+<div id="empty-name-form" style="display: none;">
+    <div class="formset-row name-form mb-2">
+        {{ name_formset.empty_form.id }}
+        <div class="delete-checkbox" style="display:none;">{{ name_formset.empty_form.DELETE }}</div>
+        <div class="input-group">
+            {{ name_formset.empty_form.name }}
+            <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+</div>
+<div id="empty-phone-form" style="display: none;">
+    <div class="formset-row phone-form mb-2">
+        {{ phone_formset.empty_form.id }}
+        <div class="delete-checkbox" style="display:none;">{{ phone_formset.empty_form.DELETE }}</div>
+        <div class="input-group">
+            {{ phone_formset.empty_form.phone_number.0 }}
+            {{ phone_formset.empty_form.phone_number.1 }}
+            <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+</div>
+<div id="empty-email-form" style="display: none;">
+    <div class="formset-row email-form mb-2">
+        {{ email_formset.empty_form.id }}
+        <div class="delete-checkbox" style="display:none;">{{ email_formset.empty_form.DELETE }}</div>
+        <div class="input-group">
+            {{ email_formset.empty_form.email }}
+            <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+</div>
+<div id="empty-website-form" style="display: none;">
+    <div class="formset-row website-form mb-2">
+        {{ website_formset.empty_form.id }}
+        <div class="delete-checkbox" style="display:none;">{{ website_formset.empty_form.DELETE }}</div>
+        <div class="input-group">
+            {{ website_formset.empty_form.website }}
+            <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+</div>
+<div id="empty-image-form" style="display: none;">
+    <div class="formset-row image-form mb-2">
+        {{ image_formset.empty_form.id }}
+        <div class="delete-checkbox" style="display:none;">{{ image_formset.empty_form.DELETE }}</div>
+        <div class="input-group">
+            {{ image_formset.empty_form.image }}
+            <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+</div>
+<div id="empty-payment-account-form" style="display: none;">
+    <div class="formset-row payment-account-form mb-2">
+        {{ payment_account_formset.empty_form.id }}
+        <div class="delete-checkbox" style="display:none;">{{ payment_account_formset.empty_form.DELETE }}</div>
+        <div class="input-group">
+            {{ payment_account_formset.empty_form.account_number }}
+            <button class="btn btn-outline-danger remove-form-row" type="button"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+
+
+{{ all_tags|json_script:"tags-whitelist" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- FAB Logic ---
+    const fabToggle = document.getElementById('fab-toggle');
+    const fabMenu = document.getElementById('fab-menu');
+    fabToggle.addEventListener('click', function() {
+        fabMenu.style.display = fabMenu.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    // --- Dynamic Formset Logic ---
+    const formsetMap = {
+        name: { container: 'name-formset', empty: 'empty-name-form', prefix: 'names' },
+        phone: { container: 'phone-formset', empty: 'empty-phone-form', prefix: 'phones' },
+        email: { container: 'email-formset', empty: 'empty-email-form', prefix: 'emails' },
+        website: { container: 'website-formset', empty: 'empty-website-form', prefix: 'websites' },
+        image: { container: 'image-formset', empty: 'empty-image-form', prefix: 'images' },
+        payment_account: { container: 'payment-account-formset', empty: 'empty-payment-account-form', prefix: 'payment_accounts' }
+    };
+
+    fabMenu.addEventListener('click', function(e) {
+        const menuItem = e.target.closest('.fab-menu-item');
+        if (!menuItem) return;
+
+        const formType = menuItem.dataset.formType;
+        const config = formsetMap[formType];
+        if (!config) return;
+
+        const formsetContainer = document.getElementById(config.container);
+        const totalFormsInput = document.querySelector(`#id_${config.prefix}-TOTAL_FORMS`);
+        let formIdx = parseInt(totalFormsInput.value);
+
+        const emptyFormTemplate = document.getElementById(config.empty).innerHTML;
+        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newFormHtml;
+        const newFormElement = tempDiv.firstElementChild;
+        
+        formsetContainer.appendChild(newFormElement);
+        totalFormsInput.value = formIdx + 1;
+        
+        // Hide menu after adding
+        fabMenu.style.display = 'none';
+
+        // Attach event listeners to the newly added phone number field
+        if (formType === 'phone') {
+            const newFormRow = newFormElement;
+            const countryCodeSelect = newFormRow.querySelector('select[name$="-phone_number_0"]');
+            const localNumberInput = newFormRow.querySelector('input[name$="-phone_number_1"]');
+            
+            if (countryCodeSelect) {
+                countryCodeSelect.addEventListener('change', () => formatPhoneNumber(newFormRow));
+            }
+            if (localNumberInput) {
+                localNumberInput.addEventListener('input', () => formatPhoneNumber(newFormRow));
+            }
+        }
+    });
+
+    // --- Remove Row Logic ---
+    document.body.addEventListener('click', function(e) {
+        let removeBtn = e.target.closest('.remove-form-row');
+        if (removeBtn) {
+            const formRow = removeBtn.closest('.formset-row');
+            const deleteInput = formRow.querySelector('input[type="checkbox"]');
+            if (deleteInput) {
+                deleteInput.checked = true;
+            }
+            formRow.style.display = 'none';
+        }
+    });
+
+    // --- Phone Number Formatting Logic ---
+    function formatPhoneNumber(formRow) {
+        const countryCodeSelect = formRow.querySelector('select[name$="-phone_number_0"]');
+        const localNumberInput = formRow.querySelector('input[name$="-phone_number_1"]');
+
+        if (!countryCodeSelect || !localNumberInput) return;
+
+        const countryCode = countryCodeSelect.value;
+        let localNumber = localNumberInput.value.replace(/\D/g, ''); // Remove non-digits
+        
+        // Remove leading '0' if present
+        if (localNumber.startsWith('0')) {
+            localNumber = localNumber.substring(1);
+        }
+
+        // The actual field that Django will process is the hidden one.
+        // We need to find the original hidden input for phone_number
+        // which is usually named like id_form-X-phone_number
+        // For MultiValueField, the actual field is not directly rendered,
+        // but its compressed value is handled by the form's clean method.
+        // So, we just need to ensure the individual inputs have correct values.
+        // The compress method in forms.py will handle combining them.
+        // No need for a hidden input here, as the form's compress method does the job.
+    }
+
+    // Attach event listeners to existing phone number fields
+    document.querySelectorAll('.phone-form').forEach(formRow => {
+        const countryCodeSelect = formRow.querySelector('select[name$="-phone_number_0"]');
+        const localNumberInput = formRow.querySelector('input[name$="-phone_number_1"]');
+        
+        if (countryCodeSelect) {
+            countryCodeSelect.addEventListener('change', () => formatPhoneNumber(formRow));
+        }
+        if (localNumberInput) {
+            localNumberInput.addEventListener('input', () => formatPhoneNumber(formRow));
+        }
+    });
+
+    // --- Tagify Init ---
+    var input = document.getElementById('id_tags');
+    var whitelistEl = document.getElementById('tags-whitelist');
+    var whitelist = [];
+    if (whitelistEl) {
+        whitelist = JSON.parse(whitelistEl.textContent);
+    }
+    var tagify = new Tagify(input, {
+        whitelist: whitelist,
+        enforceWhitelist: false,
+        dropdown: {
+            enabled: 0,
+            maxItems: 20,
+            position: "all",
+            closeOnSelect: false,
+            highlightFirst: true
+        }
+    });
+});
+</script>
+{% endblock %}

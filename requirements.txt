@@ -1,0 +1,9 @@
+Django==5.2.7
+gunicorn
+dj-database-url
+psycopg2-binary
+python-dotenv
+django-pwa
+django-tagify
+Faker # Only for development/populate_db command
+polib
