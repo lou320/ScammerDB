@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+
 from django.db import transaction
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
@@ -7,6 +8,7 @@ from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, Scam
 from .forms import ScammerForm, ScammerNameFormSet, ScammerPhoneNumberFormSet, ScammerEmailFormSet, ScammerWebsiteFormSet, ScammerImageFormSet, ScammerPaymentAccountFormSet
 
 from django.core.paginator import Paginator
+
 
 def scammer_list(request):
     query = request.GET.get('q', '')
