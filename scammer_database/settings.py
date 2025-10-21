@@ -212,6 +212,10 @@ SESSION_COOKIE_SECURE = os.environ.get('DJANGO_SESSION_COOKIE_SECURE', 'False').
 CSRF_COOKIE_SECURE = os.environ.get('DJANGO_CSRF_COOKIE_SECURE', 'False').lower() == 'true'
 SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'False').lower() == 'true'
 
+# Allow cookies to be shared across subdomains for www/non-www consistency
+SESSION_COOKIE_DOMAIN = os.environ.get('DJANGO_SESSION_COOKIE_DOMAIN', None)
+CSRF_COOKIE_DOMAIN = os.environ.get('DJANGO_CSRF_COOKIE_DOMAIN', None)
+
 # HSTS (HTTP Strict Transport Security) Settings
 # These tell browsers to only use HTTPS for the next year.
 # Only enable these after you have confirmed SSL is working perfectly.
