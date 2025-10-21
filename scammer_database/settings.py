@@ -204,3 +204,18 @@ PWA_APP_ICONS_APPLE = [
 PWA_APP_FAVICON = '/static/images/favicon.ico'
 
 FREE_TRIAL_ENABLED = False
+
+# settings.py
+
+# Secure Cookie and SSL Redirect settings (reads from .env file)
+SESSION_COOKIE_SECURE = os.environ.get('DJANGO_SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+CSRF_COOKIE_SECURE = os.environ.get('DJANGO_CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+
+# HSTS (HTTP Strict Transport Security) Settings
+# These tell browsers to only use HTTPS for the next year.
+# Only enable these after you have confirmed SSL is working perfectly.
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000 # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
