@@ -197,11 +197,13 @@ body {
 .next-button {
     right: 0;
     border-radius: 3px 0 0 3px;
+    text-decoration: none;
 }
 
 .prev-button {
     left: 0;
     border-radius: 3px 0 0 3px; /* Added for consistency */
+    text-decoration: none;
 }
 
 .prev-button:hover, .next-button:hover {
