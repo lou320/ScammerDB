@@ -142,7 +142,7 @@ msgstr "လူလိမ်အသစ် ထည့်သွင်းရန်"
 #: scammer_database/scammers/templates/scammers/base.html:30
 #: scammer_database/scammers/templates/scammers/pending_scammer_list.html:6
 msgid "Pending Scammers"
-msgstr "လူလိမ်အသစ် ထည့်သွင်းရန်"
+msgstr ""
 
 #: scammer_database/scammers/templates/scammers/base.html:35
 msgid "Language"
