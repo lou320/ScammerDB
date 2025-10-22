@@ -92,7 +92,8 @@ def scammer_detail(request, pk):
     # Prepare related scammers data for the template
     related_data = []
     if scammer.related_scammers.exists():
-        for related in scammer.related_scammers.all():
+        approved_related_scammers = scammer.related_scammers.filter(status='approved')
+        for related in approved_related_scammers:
             reasons = scammer.get_relationship_reasons(related)
             related_data.append({'scammer': related, 'reasons': reasons})
 

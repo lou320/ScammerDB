@@ -2,63 +2,39 @@
 {% load i18n %}
 
 {% block content %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  
-  document.body.addEventListener('change', (event) => {
-    
-    const input = event.target;
-    if (input.type === 'file' && input.name.endsWith('-image')) {
-      
-      const file = input.files[0];
-      if (!file) {
-        return; 
-      }
-
-      console.log('Original file selected:', {
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-        type: file.type
-      });
-
-      new Compressor(file, {
-        quality: 0.6,     
-        maxWidth: 1280,   
-        maxHeight: 1280,
-        mimeType: 'image/jpeg', 
-        
-        success(compressedResult) {
-          
-          console.log('Compression SUCCESS:', {
-            name: compressedResult.name,
-            size: (compressedResult.size / 1024 / 1024).toFixed(2) + ' MB',
-            type: compressedResult.type
-          });
-
-          // --- THIS IS THE FIX ---
-          // 1. Convert the compressed Blob into a File
-          const compressedFile = new File([compressedResult], compressedResult.name, {
-            type: compressedResult.type,
-            lastModified: Date.now(),
-          });
-
-          // 2. Add the new *File* to the DataTransfer
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(compressedFile); // This now works
-          
-          input.files = dataTransfer.files;
-          // --- END OF FIX ---
-        },
-
-        error(err) {
-          console.error('Compression FAILED:', err.message);
-        },
-      });
+<style>
+    #loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
     }
-  });
-});
-</script>
+
+    .loader {
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #3498db;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<div id="loading-overlay">
+    <div class="loader"></div>
+</div>
+
 <h2 class="{% if request.LANGUAGE_CODE == 'my' %}burmese-heading{% endif %}">{% trans "Add Scammer Details" %}</h2>
 <br>
 <form method="post" enctype="multipart/form-data">
@@ -163,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <a href="{% url 'scammer_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
 </form>
 
+
 <!-- Floating Action Button -->
 <div class="fab-container">
     <div class="fab-menu" id="fab-menu">
@@ -265,14 +242,82 @@ document.addEventListener('DOMContentLoaded', () => {
 {% endblock %}
 
 {% block extra_js %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // --- FAB Logic ---
+    
+    // --- Get shared elements ---
+    const form = document.querySelector('form');
+    const loadingOverlay = document.getElementById('loading-overlay');
     const fabToggle = document.getElementById('fab-toggle');
     const fabMenu = document.getElementById('fab-menu');
-    fabToggle.addEventListener('click', function() {
-        fabMenu.style.display = fabMenu.style.display === 'flex' ? 'none' : 'flex';
+
+    // --- Compressor Logic ---
+    // (This now lives inside your main DOMContentLoaded)
+    document.body.addEventListener('change', (event) => {
+        const input = event.target;
+        if (input.type === 'file' && input.name.endsWith('-image')) {
+            const file = input.files[0];
+            if (!file) { return; }
+
+            console.log('Original file selected:', { name: file.name, size: (file.size/1024/1024).toFixed(2) + ' MB' });
+
+            new Compressor(file, {
+                quality: 0.6,     
+                maxWidth: 1280,   
+                maxHeight: 1280,
+                mimeType: 'image/jpeg', 
+                success(compressedResult) {
+                    console.log('Compression SUCCESS:', { name: compressedResult.name, size: (compressedResult.size/1024/1024).toFixed(2) + ' MB' });
+                    const compressedFile = new File([compressedResult], compressedResult.name, {
+                        type: compressedResult.type,
+                        lastModified: Date.now(),
+                    });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(compressedFile);
+                    input.files = dataTransfer.files;
+                },
+                error(err) {
+                    console.error('Compression FAILED:', err.message);
+                },
+            });
+        }
     });
+
+    // --- LOADING SPINNER FIX (with Validation Check) ---
+    if (form && loadingOverlay) {
+        form.addEventListener('submit', function(event) {
+            // 1. Stop the form immediately
+            event.preventDefault(); 
+
+            // 2. CHECK HTML5 VALIDITY FIRST!
+            if (!form.checkValidity()) {
+                // Form is invalid (e.g., required field is empty)
+                // Tell the browser to show the validation error (e.g., "Please fill out this field.")
+                // We do NOT show the spinner.
+                form.reportValidity(); 
+                return; // Stop here
+            }
+
+            // 3. If valid, show the spinner
+            loadingOverlay.style.display = 'flex';
+
+            // 4. Wait 10ms to let the browser *render the spinner*,
+            //    then submit the form.
+            setTimeout(() => {
+                form.submit();
+            }, 10); 
+        });
+    }
+
+    // --- FAB Logic ---
+    if (fabToggle && fabMenu) {
+        fabToggle.addEventListener('click', function() {
+            fabMenu.style.display = fabMenu.style.display === 'flex' ? 'none' : 'flex';
+        });
+    }
 
     // --- Dynamic Formset Logic ---
     const formsetMap = {
@@ -284,45 +329,45 @@ document.addEventListener('DOMContentLoaded', function() {
         payment_account: { container: 'payment-account-formset', empty: 'empty-payment-account-form', prefix: 'payment_accounts' }
     };
 
-    fabMenu.addEventListener('click', function(e) {
-        const menuItem = e.target.closest('.fab-menu-item');
-        if (!menuItem) return;
+    if (fabMenu) {
+        fabMenu.addEventListener('click', function(e) {
+            const menuItem = e.target.closest('.fab-menu-item');
+            if (!menuItem) return;
 
-        const formType = menuItem.dataset.formType;
-        const config = formsetMap[formType];
-        if (!config) return;
+            const formType = menuItem.dataset.formType;
+            const config = formsetMap[formType];
+            if (!config) return;
 
-        const formsetContainer = document.getElementById(config.container);
-        const totalFormsInput = document.querySelector(`#id_${config.prefix}-TOTAL_FORMS`);
-        let formIdx = parseInt(totalFormsInput.value);
+            const formsetContainer = document.getElementById(config.container);
+            const totalFormsInput = document.querySelector(`#id_${config.prefix}-TOTAL_FORMS`);
+            let formIdx = parseInt(totalFormsInput.value);
 
-        const emptyFormTemplate = document.getElementById(config.empty).innerHTML;
-        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
-        
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = newFormHtml;
-        const newFormElement = tempDiv.firstElementChild;
-        
-        formsetContainer.appendChild(newFormElement);
-        totalFormsInput.value = formIdx + 1;
-        
-        // Hide menu after adding
-        fabMenu.style.display = 'none';
-
-        // Attach event listeners to the newly added phone number field
-        if (formType === 'phone') {
-            const newFormRow = newFormElement;
-            const countryCodeSelect = newFormRow.querySelector('select[name$="-phone_number_0"]');
-            const localNumberInput = newFormRow.querySelector('input[name$="-phone_number_1"]');
+            const emptyFormTemplate = document.getElementById(config.empty).innerHTML;
+            const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
             
-            if (countryCodeSelect) {
-                countryCodeSelect.addEventListener('change', () => formatPhoneNumber(newFormRow));
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFormHtml;
+            const newFormElement = tempDiv.firstElementChild;
+            
+            formsetContainer.appendChild(newFormElement);
+            totalFormsInput.value = formIdx + 1;
+            
+            fabMenu.style.display = 'none';
+
+            if (formType === 'phone') {
+                const newFormRow = newFormElement;
+                const countryCodeSelect = newFormRow.querySelector('select[name$="-phone_number_0"]');
+                const localNumberInput = newFormRow.querySelector('input[name$="-phone_number_1"]');
+                
+                if (countryCodeSelect) {
+                    countryCodeSelect.addEventListener('change', () => formatPhoneNumber(newFormRow));
+                }
+                if (localNumberInput) {
+                    localNumberInput.addEventListener('input', () => formatPhoneNumber(newFormRow));
+                }
             }
-            if (localNumberInput) {
-                localNumberInput.addEventListener('input', () => formatPhoneNumber(newFormRow));
-            }
-        }
-    });
+        });
+    }
 
     // --- Remove Row Logic ---
     document.body.addEventListener('click', function(e) {
@@ -341,28 +386,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatPhoneNumber(formRow) {
         const countryCodeSelect = formRow.querySelector('select[name$="-phone_number_0"]');
         const localNumberInput = formRow.querySelector('input[name$="-phone_number_1"]');
-
         if (!countryCodeSelect || !localNumberInput) return;
-
-        const countryCode = countryCodeSelect.value;
-        let localNumber = localNumberInput.value.replace(/\D/g, ''); // Remove non-digits
-        
-        // Remove leading '0' if present
+        let localNumber = localNumberInput.value.replace(/\D/g, ''); 
         if (localNumber.startsWith('0')) {
             localNumber = localNumber.substring(1);
         }
-
-        // The actual field that Django will process is the hidden one.
-        // We need to find the original hidden input for phone_number
-        // which is usually named like id_form-X-phone_number
-        // For MultiValueField, the actual field is not directly rendered,
-        // but its compressed value is handled by the form's clean method.
-        // So, we just need to ensure the individual inputs have correct values.
-        // The compress method in forms.py will handle combining them.
-        // No need for a hidden input here, as the form's compress method does the job.
+        localNumberInput.value = localNumber; 
     }
 
-    // Attach event listeners to existing phone number fields
     document.querySelectorAll('.phone-form').forEach(formRow => {
         const countryCodeSelect = formRow.querySelector('select[name$="-phone_number_0"]');
         const localNumberInput = formRow.querySelector('input[name$="-phone_number_1"]');
@@ -395,4 +426,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-{% endblock %}
+{% endblock %}  
