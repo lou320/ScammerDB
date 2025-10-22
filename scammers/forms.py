@@ -686,7 +686,7 @@ class ScammerPaymentAccountForm(forms.ModelForm):
         model = ScammerPaymentAccount
         fields = ('account_number',)
         widgets = {
-            'account_number': forms.TextInput(attrs={'placeholder': _('Payment Account Number'), 'class': 'form-control'})
+            'account_number': forms.TextInput(attrs={'placeholder': _('Payment Account: Number & Name'), 'class': 'form-control'})
         }
 
 ScammerPaymentAccountFormSet = inlineformset_factory(

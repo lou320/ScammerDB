@@ -71,7 +71,7 @@ msgid "Website"
 msgstr ""
 
 #: scammer_database/scammers/forms.py:689
-msgid "Payment Account Number"
+msgid "Payment Account: Number & Name"
 msgstr ""
 
 #: scammer_database/scammers/forms.py:701
