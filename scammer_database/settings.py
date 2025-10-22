@@ -203,7 +203,7 @@ PWA_APP_ICONS_APPLE = [
 ]
 PWA_APP_FAVICON = '/static/images/favicon.ico'
 
-FREE_TRIAL_ENABLED = False
+FREE_TRIAL_ENABLED = True
 
 # settings.py
 

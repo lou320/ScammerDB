@@ -253,3 +253,19 @@ msgstr "အခြား ဆက်စပ်သောလိမ်လည်မှ�
 
 msgid "Password"
 msgstr "Password"
+
+#: scammer_database/scammers/templates/scammers/base.html:137
+msgid "Install the app on your device to easily access it anytime."
+msgstr "Install ပြုလုပ်ပြီး လွယ်ကူစွာအသုံးပြုလိုက်ပါ။"
+
+#: scammers/templates/scammers/base.html:139
+msgid "Tap on"
+msgstr "ဖော်ပြပါပုံသဏ္ဌာန်နှင့်ခလုတ်အား နှိပ်ပါ။"
+
+#: scammers/templates/scammers/base.html:140
+msgid "Select 'Add to Home Screen'"
+msgstr "‘Add to Home Screen’ ကိုနှိပ်ပါ။"
+
+#: scammers/templates/scammers/base.html:145
+msgid "Not Now"
+msgstr "မလုပ်သေးပါ"

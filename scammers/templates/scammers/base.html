@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
 <body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg navbar-dark bg-custom-red">
@@ -125,6 +127,26 @@
                     </div>
                 </div>
                 
+                <div id="pwa-install-overlay" style="display: none;">
+                    <div id="pwa-install-modal">
+                        <div class="pwa-modal-header">
+                            <img src="{% static 'images/icon-192x192.png' %}" alt="App Icon" class="pwa-modal-icon">
+                            <h5 class="pwa-modal-title">{% trans "Install Scammer DB" %}</h5>
+                        </div>
+                        <div class="pwa-modal-body">
+                            <p class="pwa-modal-description">{% trans "Install the app on your device to easily access it anytime." %}</p>
+                            <div id="pwa-ios-instructions" style="display: none;">
+                                <p>1. {% trans "Tap on" %}&nbsp;<i class="fa-solid fa-arrow-up-from-bracket"></i></p>
+                                <p>2. {% trans "Select 'Add to Home Screen'" %}</p>
+                            </div>
+                        </div>
+                        <div class="pwa-modal-footer">
+                            <button id="pwa-install-button" class="btn btn-primary w-100">{% trans "Install" %}</button>
+                            <button id="pwa-close-button" class="btn btn-secondary w-100 mt-2">{% trans "Not Now" %}</button>
+                        </div>
+                    </div>
+                </div>
+
                 <footer class="footer mt-auto py-3 bg-custom-red text-light">
                 <div class="container text-center">
                 <span>&copy; 2025 {% trans "Scammer DB" %}. {% trans "All rights reserved." %}</span>
@@ -169,6 +191,59 @@
                             this.closest('form').submit();
                         });
                     });
+                });
+                </script>
+                                                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const overlay = document.getElementById('pwa-install-overlay');
+                    const installButton = document.getElementById('pwa-install-button');
+                    const closeButton = document.getElementById('pwa-close-button');
+                    const iosInstructions = document.getElementById('pwa-ios-instructions');
+
+                    const showPrompt = () => {
+                        // Only show if the flag hasn't been set in this session
+                        if (sessionStorage.getItem('pwaInstallPromptShown') === 'true') return;
+                        overlay.style.display = 'flex';
+                        sessionStorage.setItem('pwaInstallPromptShown', 'true');
+                    };
+                    const hidePrompt = () => overlay.style.display = 'none';
+
+                    const isIOS = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+                    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+                    if (isInStandaloneMode()) {
+                        return; // Don't show anything if the app is already installed
+                    }
+
+                    closeButton.addEventListener('click', hidePrompt);
+
+                    if (isIOS()) {
+                        installButton.style.display = 'none';
+                        iosInstructions.style.display = 'block';
+                        showPrompt();
+                    } else {
+                        let deferredPrompt;
+                        window.addEventListener('beforeinstallprompt', (e) => {
+                            e.preventDefault();
+                            deferredPrompt = e;
+                            iosInstructions.style.display = 'none';
+                            installButton.style.display = 'block';
+                            showPrompt();
+                        });
+
+                        installButton.addEventListener('click', async () => {
+                            if (deferredPrompt) {
+                                hidePrompt();
+                                deferredPrompt.prompt();
+                                await deferredPrompt.userChoice;
+                                deferredPrompt = null;
+                            }
+                        });
+
+                        window.addEventListener('appinstalled', () => {
+                            hidePrompt();
+                        });
+                    }
                 });
                 </script>
                 {% block extra_js %}{% endblock %}
