@@ -70,6 +70,11 @@ msgstr "အီးမေးလ်"
 msgid "Website"
 msgstr "ဝက်ဘ်ဆိုဒ်"
 
+
+#: scammer_database/scammers/templates/scammers/add_scammer.html:5
+msgid "Image"
+msgstr "ဓာတ်ပုံ"
+
 #: scammer_database/scammers/forms.py:689
 msgid "Payment Account Number"
 msgstr "လူလိမ်၏ ငွေလက်ခံနံပတ်"
