@@ -126,3 +126,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+#media files
+media/scammer_images/
