@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loading-overlay');
     const fabToggle = document.getElementById('fab-toggle');
     const fabMenu = document.getElementById('fab-menu');
+    const submitButton = document.querySelector('button[type="submit"]');
 
     // --- Compressor Logic ---
     // (This now lives inside your main DOMContentLoaded)
@@ -287,29 +288,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- LOADING SPINNER FIX (with Validation Check) ---
-    if (form && loadingOverlay) {
-        form.addEventListener('submit', function(event) {
+    if (form && loadingOverlay && submitButton) {
+        console.log('Loading spinner script initialized.');
+
+        submitButton.addEventListener('click', function(event) {
+            console.log('Submit button clicked.');
             // 1. Stop the form immediately
-            event.preventDefault(); 
+            event.preventDefault();
 
             // 2. CHECK HTML5 VALIDITY FIRST!
             if (!form.checkValidity()) {
+                console.log('Form is invalid. Aborting submission.');
                 // Form is invalid (e.g., required field is empty)
                 // Tell the browser to show the validation error (e.g., "Please fill out this field.")
                 // We do NOT show the spinner.
-                form.reportValidity(); 
+                form.reportValidity();
                 return; // Stop here
             }
 
+            console.log('Form is valid. Showing loading spinner.');
             // 3. If valid, show the spinner
             loadingOverlay.style.display = 'flex';
 
-            // 4. Wait 10ms to let the browser *render the spinner*,
-            //    then submit the form.
-            setTimeout(() => {
-                form.submit();
-            }, 10); 
+            // 4. Use requestAnimationFrame to ensure the spinner is painted before submission
+            requestAnimationFrame(() => {
+                console.log('requestAnimationFrame callback executed.');
+                // A nested timeout to give it a moment longer, just in case.
+                setTimeout(() => {
+                    console.log('Submitting form now.');
+                    form.submit();
+                }, 0);
+            });
         });
+    } else {
+        console.error('Could not find form, loadingOverlay, or submitButton element.');
     }
 
     // --- FAB Logic ---
@@ -426,4 +438,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-{% endblock %}  
+{% endblock %}

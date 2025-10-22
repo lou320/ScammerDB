@@ -66,7 +66,7 @@
 
                 {% if scammer.description %}
                 <h5>Description:</h5>
-                <p>{{ scammer.description }}</p>
+                <p>{{ scammer.description|linebreaks }}</p>
                 {% endif %}
 
                 {% if display_images %}
