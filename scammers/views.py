@@ -23,16 +23,16 @@ def scammer_list(request):
 
     if query:
         if search_field == 'name':
-            scammers_list = scammers_list.filter(names__name__icontains=query)
+            scammers_list = scammers_list.filter(names__name__icontains=query).distinct()
         elif search_field == 'phone':
             query = query.lstrip('0')
-            scammers_list = scammers_list.filter(phone_numbers__phone_number__icontains=query)
+            scammers_list = scammers_list.filter(phone_numbers__phone_number__icontains=query).distinct()
         elif search_field == 'email':
-            scammers_list = scammers_list.filter(emails__email__icontains=query)
+            scammers_list = scammers_list.filter(emails__email__icontains=query).distinct()
         elif search_field == 'website':
-            scammers_list = scammers_list.filter(websites__website__icontains=query)
+            scammers_list = scammers_list.filter(websites__website__icontains=query).distinct()
         elif search_field == 'tag':
-            scammers_list = scammers_list.filter(tags__name__icontains=query)
+            scammers_list = scammers_list.filter(tags__name__icontains=query).distinct()
         else: # 'all'
             # Create a modified query for phone number search without leading zeros
             phone_query_no_leading_zeros = query.lstrip('0')
@@ -43,7 +43,7 @@ def scammer_list(request):
                 Q(emails__email__icontains=query) |
                 Q(websites__website__icontains=query) |
                 Q(tags__name__icontains=query)
-            )
+            ).distinct()
 
     paginator = Paginator(scammers_list, 9) # 9 items per page
     page_number = request.GET.get('page')
