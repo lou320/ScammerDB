@@ -2,6 +2,63 @@
 {% load i18n %}
 
 {% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  
+  document.body.addEventListener('change', (event) => {
+    
+    const input = event.target;
+    if (input.type === 'file' && input.name.endsWith('-image')) {
+      
+      const file = input.files[0];
+      if (!file) {
+        return; 
+      }
+
+      console.log('Original file selected:', {
+        name: file.name,
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+        type: file.type
+      });
+
+      new Compressor(file, {
+        quality: 0.6,     
+        maxWidth: 1280,   
+        maxHeight: 1280,
+        mimeType: 'image/jpeg', 
+        
+        success(compressedResult) {
+          
+          console.log('Compression SUCCESS:', {
+            name: compressedResult.name,
+            size: (compressedResult.size / 1024 / 1024).toFixed(2) + ' MB',
+            type: compressedResult.type
+          });
+
+          // --- THIS IS THE FIX ---
+          // 1. Convert the compressed Blob into a File
+          const compressedFile = new File([compressedResult], compressedResult.name, {
+            type: compressedResult.type,
+            lastModified: Date.now(),
+          });
+
+          // 2. Add the new *File* to the DataTransfer
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(compressedFile); // This now works
+          
+          input.files = dataTransfer.files;
+          // --- END OF FIX ---
+        },
+
+        error(err) {
+          console.error('Compression FAILED:', err.message);
+        },
+      });
+    }
+  });
+});
+</script>
 <h2 class="{% if request.LANGUAGE_CODE == 'my' %}burmese-heading{% endif %}">{% trans "Add Scammer Details" %}</h2>
 <br>
 <form method="post" enctype="multipart/form-data">
