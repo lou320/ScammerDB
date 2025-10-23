@@ -29,6 +29,9 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+    .phone-form .input-group select {
+        flex: 0 0 35% !important; 
+    }
 </style>
 
 <div id="loading-overlay">
@@ -36,7 +39,7 @@
 </div>
 
 <h2 class="{% if request.LANGUAGE_CODE == 'my' %}burmese-heading{% endif %}">{% trans "Add Scammer Details" %}</h2>
-<br>
+<p>{% trans "Click the + icon at lower corner of the screen to add scammer details." %}</p>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 

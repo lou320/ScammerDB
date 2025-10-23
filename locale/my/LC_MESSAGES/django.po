@@ -29,6 +29,9 @@ msgstr ""
 msgid "Phone Number"
 msgstr "ဖုန်းနံပါတ်"
 
+msgid "Scammer Phone Number"
+msgstr "လူလိမ်၏ ဖုန်းနံပါတ်"
+
 #: scammer_database/scammers/forms.py:299
 #: scammer_database/scammers/forms.py:639
 msgid "Comma-separated tags"
@@ -284,3 +287,6 @@ msgstr "သို့မဟုတ် Telegram မှဆက်သွယ်ရန�
 #: scammers/templates/scammers/contact_us.html:5
 msgid "Contact Us"
 msgstr "ဆက်သွယ်ရန်"
+
+msgid "Click the + icon at lower corner of the screen to add scammer details."
+msgstr "ညာဘက်အောက်ထောင့်မှ + ပုံလေးကိုနှိပ်ပြီး လူလိမ်၏ အချက်အလက်များကိုထည့်သွင်းနိုင်ပါသည်။"

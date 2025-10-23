@@ -28,6 +28,9 @@ msgstr ""
 msgid "Phone Number"
 msgstr ""
 
+msgid "Scammer Phone Number"
+msgstr "Scammer's Phone Number"
+
 #: scammer_database/scammers/forms.py:299
 #: scammer_database/scammers/forms.py:639
 msgid "Comma-separated tags"

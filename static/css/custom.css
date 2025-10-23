@@ -292,3 +292,6 @@ html[lang="my"] h4.privacy-heading {
     flex-direction: column;
 }
 
+.country-code-select {
+    width: 25% !important;
+}
