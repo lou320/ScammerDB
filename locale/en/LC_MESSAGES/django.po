@@ -257,3 +257,15 @@ msgstr ""
 #: scammers/templates/scammers/base.html:140
 msgid "Select 'Add to Home Screen'"
 msgstr ""
+
+#: scammers/templates/scammers/contact_us.html:6
+msgid "To contact ScammerDB Admin From Facebook and Messenger"
+msgstr ""
+
+#: scammers/templates/scammers/contact_us.html:7
+msgid "Or to contact from Telegram"
+msgstr ""
+
+#: scammers/templates/scammers/contact_us.html:5
+msgid "Contact Us"
+msgstr ""

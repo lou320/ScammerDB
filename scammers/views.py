@@ -207,6 +207,9 @@ def add_scammer(request):
     }
     return render(request, 'scammers/add_scammer.html', context)
 
+def contact_us(request):
+    return render(request, 'scammers/contact_us.html')
+
 @staff_member_required
 def approve_scammer(request, pk):
     scammer = get_object_or_404(Scammer, pk=pk)

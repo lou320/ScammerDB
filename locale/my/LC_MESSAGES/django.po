@@ -272,3 +272,15 @@ msgstr "‘Add to Home Screen’ ကိုနှိပ်ပါ။"
 #: scammers/templates/scammers/base.html:145
 msgid "Not Now"
 msgstr "မလုပ်သေးပါ"
+
+#: scammers/templates/scammers/contact_us.html:6
+msgid "To contact ScammerDB Admin From Facebook and Messenger"
+msgstr "ScammerDB admin အား Facebook နှင့် Messenger မှ ဆက်သွယ်ရန်"
+
+#: scammers/templates/scammers/contact_us.html:7
+msgid "Or to contact from Telegram"
+msgstr "သို့မဟုတ် Telegram မှဆက်သွယ်ရန်"
+
+#: scammers/templates/scammers/contact_us.html:5
+msgid "Contact Us"
+msgstr "ဆက်သွယ်ရန်"
