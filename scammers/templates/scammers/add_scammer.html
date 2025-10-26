@@ -439,22 +439,6 @@ document.addEventListener('DOMContentLoaded', function() {
             highlightFirst: true
         }
     });
-
-    // --- DIAGNOSTIC SCRIPT for Tagify background issue ---
-    function forceTagBackground(tagEl) {
-        if (!tagEl) return;
-        var innerDiv = tagEl.querySelector('div');
-        if (innerDiv) {
-            innerDiv.style.setProperty('background', 'transparent', 'important');
-        }
-    }
-
-    tagify.on('add', function(e) {
-        forceTagBackground(e.detail.tag);
-    });
-
-    // Also check existing tags on page load
-    tagify.getTagElms().forEach(forceTagBackground);
 });
 </script>
 {% endblock %}
