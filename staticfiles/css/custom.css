@@ -52,8 +52,9 @@ body {
     font-size: 1.2em; /* Adjust as needed */
 }
 
+.tagify__tag > div,
 .tagify__tag-text {
-  background-color: transparent !important;
+    background-color: transparent !important;
 }
 
 /* FAB Styles */
