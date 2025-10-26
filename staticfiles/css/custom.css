@@ -302,3 +302,7 @@ html[lang="my"] h4.privacy-heading {
 .tagify__tag:hover > div::before {
     background-color: var(--tag-hover, #D3E2E2) !important; /* Hover background */
 }
+
+.tagify__tag .tagify__tag__removeBtn:hover ~ div::before {
+    background-color: var(--tag-remove-bg, rgba(211, 148, 148, 0.3)) !important; /* Remove button hover */
+}
