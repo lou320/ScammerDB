@@ -296,5 +296,9 @@ html[lang="my"] h4.privacy-heading {
 
 /* Fix for Tagify background issue in production */
 .tagify__tag > div::before {
-    background-color: #E5E5E5 !important;
+    background-color: #E5E5E5 !important; /* Default background */
+}
+
+.tagify__tag:hover > div::before {
+    background-color: var(--tag-hover, #D3E2E2) !important; /* Hover background */
 }
