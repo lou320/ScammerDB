@@ -52,10 +52,7 @@ body {
     font-size: 1.2em; /* Adjust as needed */
 }
 
-.tagify__tag > div,
-.tagify__tag-text {
-    background-color: transparent !important;
-}
+
 
 /* FAB Styles */
 .fab-container {
@@ -295,4 +292,11 @@ html[lang="my"] h4.privacy-heading {
 
 .country-code-select {
     width: 25% !important;
+}
+
+/* Force remove background from Tagify inner elements */
+.tagify__tag > div,
+.tagify__tag-text {
+    background: none !important;
+    background-color: transparent !important;
 }
