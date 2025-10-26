@@ -294,9 +294,8 @@ html[lang="my"] h4.privacy-heading {
     width: 25% !important;
 }
 
-/* Force remove background from Tagify inner elements */
+/* Force background color for Tagify inner elements */
 .tagify__tag > div,
 .tagify__tag-text {
-    background: none !important;
-    background-color: transparent !important;
+    background-color: #E5E5E5 !important;
 }
