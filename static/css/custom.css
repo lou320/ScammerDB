@@ -294,6 +294,7 @@ html[lang="my"] h4.privacy-heading {
     width: 25% !important;
 }
 
-.tagify__tag-text {
-  background-color: transparent !important;
+/* Fix for Tagify background issue in production */
+.tagify__tag > div::before {
+    background-color: #E5E5E5 !important;
 }
