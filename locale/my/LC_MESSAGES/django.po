@@ -56,6 +56,21 @@ msgstr "အကြောင်းအရာအသေးစိတ်"
 msgid "Name"
 msgstr "အမည်"
 
+msgid "Names"
+msgstr "အမည်များ"
+
+msgid "Phone Numbers"
+msgstr "ဖုန်းနံပါတ်များ"
+
+msgid "Tags"
+msgstr "အကြောင်းအရာ အတိုကောက်"
+
+msgid "Click here to see the details of scammer and related cases."
+msgstr "လူလိမ်၏အချက်အလက်များနှင့် ဆက်စပ်သောလိမ်လည်မှုများကိုကြည့်ရန် နှိပ်ပါ။"
+
+msgid "Payment Accounts"
+msgstr "လူလိမ်၏ ငွေလက်ခံသည့်အကောင့်မျာ"
+
 #: scammer_database/scammers/forms.py:331
 #: scammer_database/scammers/forms.py:671
 #: scammer_database/scammers/models.py:37
@@ -234,10 +249,6 @@ msgstr ""
 #: scammer_database/scammers/templates/scammers/register.html:33
 msgid "Login here"
 msgstr ""
-
-#: scammer_database/scammers/templates/scammer_detail.html:49
-msgid "Payment Accounts"
-msgstr "လူလိမ်၏ ငွေလက်ခံနံပတ်"
 
 #: scammer_database/scammers/templates/scammer_detail.html:97
 msgid "Purchase Access"

@@ -4,8 +4,9 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
-from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, ScammerWebsite, ScammerImage, Tag
-from .forms import ScammerForm, ScammerNameFormSet, ScammerPhoneNumberFormSet, ScammerEmailFormSet, ScammerWebsiteFormSet, ScammerImageFormSet, ScammerPaymentAccountFormSet
+from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, ScammerWebsite, ScammerImage, Tag, ScammerProfile
+from .forms import ScammerForm, ScammerNameFormSet, ScammerPhoneNumberFormSet, ScammerEmailFormSet, ScammerWebsiteFormSet, ScammerImageFormSet, ScammerPaymentAccountFormSet, ScammerProfileForm
+
 
 from django.core.paginator import Paginator
 
@@ -13,37 +14,47 @@ from django.core.paginator import Paginator
 def scammer_list(request):
     query = request.GET.get('q', '')
     search_field = request.GET.get('search_field', 'all')
-    scammers_list = Scammer.objects.filter(status='approved').order_by('-approved_at')
-
-    # If search_field is 'all' but query starts with 'tag:',
-    # override search_field and extract the tag name.
-    if search_field == 'all' and query.startswith('tag:'):
-        search_field = 'tag'
-        query = query[len('tag:'):] # Extract the actual tag name
+    
+    # Start with an empty queryset
+    scammers_list = Scammer.objects.none()
 
     if query:
+        # Perform search on Scammer model
+        scammer_q = Scammer.objects.filter(status='approved')
         if search_field == 'name':
-            scammers_list = scammers_list.filter(names__name__icontains=query).distinct()
+            scammer_q = scammer_q.filter(names__name__icontains=query)
         elif search_field == 'phone':
-            query = query.lstrip('0')
-            scammers_list = scammers_list.filter(phone_numbers__phone_number__icontains=query).distinct()
+            query_no_leading_zeros = query.lstrip('0')
+            scammer_q = scammer_q.filter(phone_numbers__phone_number__icontains=query_no_leading_zeros)
         elif search_field == 'email':
-            scammers_list = scammers_list.filter(emails__email__icontains=query).distinct()
+            scammer_q = scammer_q.filter(emails__email__icontains=query)
         elif search_field == 'website':
-            scammers_list = scammers_list.filter(websites__website__icontains=query).distinct()
+            scammer_q = scammer_q.filter(websites__website__icontains=query)
         elif search_field == 'tag':
-            scammers_list = scammers_list.filter(tags__name__icontains=query).distinct()
+            scammer_q = scammer_q.filter(tags__name__icontains=query)
         else: # 'all'
-            # Create a modified query for phone number search without leading zeros
             phone_query_no_leading_zeros = query.lstrip('0')
-            scammers_list = scammers_list.filter(
+            scammer_q = scammer_q.filter(
                 Q(names__name__icontains=query) |
                 Q(description__icontains=query) |
                 Q(phone_numbers__phone_number__icontains=phone_query_no_leading_zeros) |
                 Q(emails__email__icontains=query) |
                 Q(websites__website__icontains=query) |
                 Q(tags__name__icontains=query)
-            ).distinct()
+            )
+        
+        # Perform search on ScammerProfile model
+        profile_q = ScammerProfile.objects.filter(name__icontains=query)
+        
+        # Get cases from matching profiles
+        profile_scammers = Scammer.objects.filter(profiles__in=profile_q, status='approved')
+        
+        # Combine the querysets and remove duplicates
+        scammers_list = (scammer_q | profile_scammers).distinct().order_by('-approved_at')
+
+    else:
+        scammers_list = Scammer.objects.filter(status='approved').order_by('-approved_at')
+
 
     paginator = Paginator(scammers_list, 9) # 9 items per page
     page_number = request.GET.get('page')
@@ -89,6 +100,9 @@ def scammer_detail(request, pk):
     elif request.user.is_authenticated:
         has_access = UserScammerAccess.objects.filter(user=request.user, scammer=scammer).exists()
 
+    # Get the first associated profile, if any
+    profile = scammer.profiles.first()
+
     # Prepare related scammers data for the template
     related_data = []
     if scammer.related_scammers.exists():
@@ -120,6 +134,7 @@ def scammer_detail(request, pk):
 
     context = {
         'scammer': scammer,
+        'profile': profile,
         'from_page': from_page,
         'has_access': has_access,
         'related_data': related_data,
@@ -254,6 +269,52 @@ def pending_scammers(request):
     }
     return render(request, 'scammers/pending_scammer_list.html', context)
 
+@staff_member_required
+def add_scammer_profile(request):
+    if request.method == 'POST':
+        form = ScammerProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.save()
+
+            case_ids_string = form.cleaned_data.get('cases', '')
+            if case_ids_string:
+                try:
+                    import json
+                    case_data = json.loads(case_ids_string)
+                    case_ids = [item['value'] for item in case_data]
+                    
+                    profile.cases.clear()
+                    for case_id in case_ids:
+                        try:
+                            scammer = Scammer.objects.get(id=case_id)
+                            profile.cases.add(scammer)
+                        except Scammer.DoesNotExist:
+                            # Handle case where an invalid ID is entered
+                            pass
+                except (json.JSONDecodeError, TypeError):
+                    # Fallback for simple comma-separated string
+                    case_ids = [id.strip() for id in case_ids_string.split(',') if id.strip()]
+                    profile.cases.clear()
+                    for case_id in case_ids:
+                        try:
+                            scammer = Scammer.objects.get(id=case_id)
+                        except (Scammer.DoesNotExist, ValueError):
+                            # Handle invalid ID or non-integer
+                            pass
+            
+            return redirect('scammer_profile_list')
+    else:
+        form = ScammerProfileForm()
+
+    all_case_ids = list(Scammer.objects.values_list('id', flat=True))
+    context = {
+        'form': form,
+        'all_case_ids': all_case_ids,
+    }
+    return render(request, 'scammers/add_scammer_profile.html', context)
+
+
 from .forms import CustomUserCreationForm
 
 def register(request):
@@ -273,3 +334,63 @@ def purchase_access(request, pk):
     scammer = get_object_or_404(Scammer, pk=pk)
     UserScammerAccess.objects.get_or_create(user=request.user, scammer=scammer)
     return redirect('scammer_detail', pk=pk)
+
+from django.views.generic import ListView, DetailView
+from .models import ScammerProfile
+
+class ScammerProfileListView(ListView):
+    model = ScammerProfile
+    template_name = 'scammers/scammer_profile_list.html'
+    context_object_name = 'profiles'
+    paginate_by = 9
+
+class ScammerProfileDetailView(DetailView):
+    model = ScammerProfile
+    template_name = 'scammers/scammer_profile_detail.html'
+    context_object_name = 'profile'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        profile = self.get_object()
+        
+        # Get approved cases
+        approved_cases = profile.cases.filter(status='approved').order_by('-approved_at')
+        context['cases'] = approved_cases
+        
+        # Initialize sets to store unique details
+        all_names = set()
+        all_phone_numbers = set()
+        all_emails = set()
+        all_websites = set()
+        all_payment_accounts = set()
+        all_tags = set()
+        
+        # Aggregate details from all approved cases
+        for case in approved_cases:
+            for name in case.names.all():
+                if name.name:
+                    all_names.add(name.name)
+            for phone in case.phone_numbers.all():
+                if phone.phone_number:
+                    all_phone_numbers.add(phone.phone_number)
+            for email in case.emails.all():
+                if email.email:
+                    all_emails.add(email.email)
+            for website in case.websites.all():
+                if website.website:
+                    all_websites.add(website.website)
+            for account in case.payment_accounts.all():
+                if account.account_number:
+                    all_payment_accounts.add(account.account_number)
+            for tag in case.tags.all():
+                if tag.name:
+                    all_tags.add(tag.name)
+                    
+        context['all_names'] = sorted(list(all_names))
+        context['all_phone_numbers'] = sorted(list(all_phone_numbers))
+        context['all_emails'] = sorted(list(all_emails))
+        context['all_websites'] = sorted(list(all_websites))
+        context['all_payment_accounts'] = sorted(list(all_payment_accounts))
+        context['all_tags'] = sorted(list(all_tags))
+        
+        return context

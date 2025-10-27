@@ -4,7 +4,23 @@
 {% block content %}
 <div class="card">
     <div class="card-header">
-        <h2>{{ scammer.names.first.name|default:"Scammer Details" }}</h2>
+        {% if profile %}
+            <div class="row align-items-center">
+                <div class="col-md-1 col-3">
+                    {% if profile.image %}
+                        <a href="{% url 'scammer_profile_detail' profile.pk %}">
+                            <img src="{{ profile.image.url }}" class="img-fluid rounded" alt="{{ profile.name }}">
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="col-md-11 col-9">
+                    <h5 class="mb-0">
+                        <a href="{% url 'scammer_profile_detail' profile.pk %}">{{ profile.name }}</a>
+                    </h5>
+                    <p class="mb-0"><small class="text-muted">{% trans "Click here to see the details of scammer and related cases." %}</small></p>
+                </div>
+            </div>
+        {% endif %}
     </div>
     <div class="card-body">
         <div class="row">

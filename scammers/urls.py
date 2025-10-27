@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth.views import LoginView, LogoutView
 from .forms import LoginForm
+from .views import ScammerProfileListView, ScammerProfileDetailView
 
 urlpatterns = [
     path('', views.scammer_list, name='scammer_list'),
@@ -15,4 +16,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='scammers/login.html', form_class=LoginForm), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('scammer/<int:pk>/purchase/', views.purchase_access, name='purchase_access'),
+    path('profiles/add/', views.add_scammer_profile, name='add_scammer_profile'),
+    path('profiles/', ScammerProfileListView.as_view(), name='scammer_profile_list'),
+    path('profile/<int:pk>/', ScammerProfileDetailView.as_view(), name='scammer_profile_detail'),
 ]

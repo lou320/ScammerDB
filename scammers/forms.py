@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory, MultiWidget, Select, TextInput
 from django.utils.translation import gettext_lazy as _
-from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, ScammerWebsite, ScammerImage, Tag, ScammerPaymentAccount, ScammerCustomField
+from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, ScammerWebsite, ScammerImage, Tag, ScammerPaymentAccount, ScammerCustomField, ScammerProfile
 
 COUNTRY_CODE_CHOICES = [
     ('+93', 'AF (+93)'),
@@ -386,3 +386,18 @@ class LoginForm(AuthenticationForm):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': _('Username')})
         self.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password'})
+
+class ScammerProfileForm(forms.ModelForm):
+    cases = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': _('Enter Case IDs')}),
+        help_text=_('Enter comma-separated case IDs.')
+    )
+
+    class Meta:
+        model = ScammerProfile
+        fields = ['name', 'image']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Profile Name')}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }

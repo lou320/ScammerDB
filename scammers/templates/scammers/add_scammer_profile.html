@@ -1,0 +1,75 @@
+{% extends "scammers/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">{% trans "Create Scammer Profile" %}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_image" class="form-label">{{ form.image.label }}</label>
+                            {{ form.image }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_cases" class="form-label">{{ form.cases.label }}</label>
+                            <input type="text" name="cases" class="form-control" placeholder="{% trans "Enter Case IDs" %}" id="id_cases" value="{{ form.cases.value|default:'' }}">
+                            <div class="form-text">{{ form.cases.help_text }}</div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">{% trans "Create Profile" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ all_case_ids|json_script:"case-ids-whitelist" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('id_cases');
+    var whitelistEl = document.getElementById('case-ids-whitelist');
+    var whitelist = [];
+    if (whitelistEl) {
+        whitelist = JSON.parse(whitelistEl.textContent);
+    }
+    var tagify = new Tagify(input, {
+        whitelist: whitelist,
+        enforceWhitelist: true, // Only allow IDs from the whitelist
+        dropdown: {
+            enabled: 0,
+            maxItems: 10,
+            position: "all",
+            closeOnSelect: false,
+            highlightFirst: true
+        },
+        //- show an error message for invalid tags
+        validate: function(tagData){
+            if(!/^[0-9]+$/.test(tagData.value)){
+                tagify.DOM.scope.classList.add('tagify--invalid');
+                return "Invalid ID";
+            }
+            return true;
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "scammers/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>{% trans "Scammer Profiles" %}</h1>
+        {% if user.is_staff %}
+            <a href="{% url 'add_scammer_profile' %}" class="btn btn-danger">{% trans "Add Scammer Profile" %}</a>
+        {% endif %}
+    </div>
+
+    {% if profiles %}
+        <div class="row">
+            {% for profile in profiles %}
+                <div class="col-6 col-md-4 mb-4">
+                    <div class="card h-100">
+                        <a href="{% url 'scammer_profile_detail' profile.pk %}">
+                            {% if profile.image %}
+                                <img src="{{ profile.image.url }}" class="card-img-top" alt="{{ profile.name }}">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <span class="text-muted">{% trans "No Image" %}</span>
+                                </div>
+                            {% endif %}
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title text-center">
+                                <a href="{% url 'scammer_profile_detail' profile.pk %}" class="text-dark">{{ profile.name }}</a>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                            {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                        </a>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <p class="text-center">{% trans "No scammer profiles found." %}</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -187,3 +187,11 @@ class FieldAccess(models.Model):
 
     def __str__(self):
         return f"{self.model_name}.{self.field_name} - {self.get_access_level_display()}"
+
+class ScammerProfile(models.Model):
+    name = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    cases = models.ManyToManyField(Scammer, related_name='profiles')
+
+    def __str__(self):
+        return self.name

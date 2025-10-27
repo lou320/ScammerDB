@@ -1,0 +1,119 @@
+{% extends "scammers/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            {% if profile.image %}
+                <img src="{{ profile.image.url }}" class="img-fluid rounded d-block mx-auto" alt="{{ profile.name }}">
+            {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 300px;">
+                    <span class="text-muted">{% trans "No Image" %}</span>
+                </div>
+            {% endif %}
+            <h2 class="text-center mt-3">{{ profile.name }}</h2>
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                {% if all_names %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header">{% trans "Names" %}</div>
+                        <ul class="list-group list-group-flush">
+                            {% for name in all_names %}
+                                <li class="list-group-item">{{ name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if all_phone_numbers %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header">{% trans "Phone Numbers" %}</div>
+                        <ul class="list-group list-group-flush">
+                            {% for phone in all_phone_numbers %}
+                                <li class="list-group-item">{{ phone }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if all_emails %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header">{% trans "Emails" %}</div>
+                        <ul class="list-group list-group-flush">
+                            {% for email in all_emails %}
+                                <li class="list-group-item">{{ email }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if all_websites %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header">{% trans "Websites" %}</div>
+                        <ul class="list-group list-group-flush">
+                            {% for website in all_websites %}
+                                <li class="list-group-item">{{ website }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if all_payment_accounts %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header">{% trans "Payment Accounts" %}</div>
+                        <ul class="list-group list-group-flush">
+                            {% for account in all_payment_accounts %}
+                                <li class="list-group-item">{{ account }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if all_tags %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header">{% trans "Tags" %}</div>
+                        <div class="card-body">
+                            {% for tag in all_tags %}
+                                <span class="badge bg-secondary me-1">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <h3>{% trans "Related Cases" %}</h3>
+            <hr>
+            {% if cases %}
+                <div class="list-group">
+                    {% for case in cases %}
+                        <a href="{% url 'scammer_detail' case.pk %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    {% if case.names.first %}
+                                        {{ case.names.first.name }}
+                                    {% else %}
+                                        {% trans "Case" %} #{{ case.pk }}
+                                    {% endif %}
+                                </h5>
+                                <small>{{ case.approved_at|date:"d M Y" }}</small>
+                            </div>
+                            <p class="mb-1">{{ case.description|truncatewords:20 }}</p>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>{% trans "No approved cases found for this profile." %}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

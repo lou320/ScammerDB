@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, ScammerWebsite, ScammerImage, Tag, ScammerPaymentAccount, ScammerCustomField
+from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, ScammerWebsite, ScammerImage, Tag, ScammerPaymentAccount, ScammerCustomField, ScammerProfile
 
 class ScammerNameInline(admin.TabularInline):
     model = ScammerName
@@ -55,3 +55,9 @@ class ScammerAdmin(admin.ModelAdmin):
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     search_fields = ('name',)
+
+@admin.register(ScammerProfile)
+class ScammerProfileAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+    filter_horizontal = ('cases',)
