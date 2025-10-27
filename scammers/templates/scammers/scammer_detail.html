@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="card">
+    {% if profile %}
     <div class="card-header">
-        {% if profile %}
             <div class="row align-items-center">
                 <div class="col-md-1 col-3">
                     {% if profile.image %}
@@ -20,8 +20,8 @@
                     <p class="mb-0"><small class="text-muted">{% trans "Click here to see the details of scammer and related cases." %}</small></p>
                 </div>
             </div>
-        {% endif %}
     </div>
+    {% endif %}
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
