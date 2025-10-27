@@ -344,6 +344,27 @@ class ScammerProfileListView(ListView):
     context_object_name = 'profiles'
     paginate_by = 9
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page_obj = context['page_obj']
+        paginator = context['paginator']
+
+        # Calculate pagination window
+        window_size = 1
+        current_page = page_obj.number
+        total_pages = paginator.num_pages
+        
+        start = max(current_page - window_size, 1)
+        end = min(current_page + window_size, total_pages)
+
+        if start == 1:
+            end = min(start + (window_size * 2), total_pages)
+        if end == total_pages:
+            start = max(end - (window_size * 2), 1)
+
+        context['page_numbers'] = range(start, end + 1)
+        return context
+
 class ScammerProfileDetailView(DetailView):
     model = ScammerProfile
     template_name = 'scammers/scammer_profile_detail.html'
