@@ -69,11 +69,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'scammers',
     'pwa',
+    'rest_framework',
+    'corsheaders',
+    'api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,6 +85,18 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny'
+    ]
+}
+
+CORS_ALLOW_ALL_ORIGINS = True # For development
+# CORS_ALLOWED_ORIGINS = [
+#     "chrome-extension://<your_extension_id>",
+# ]
+
 
 ROOT_URLCONF = 'scammer_database.urls'
 

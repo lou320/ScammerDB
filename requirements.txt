@@ -7,3 +7,5 @@ django-pwa
 django-tagify
 Faker # Only for development/populate_db command
 polib
+djangorestframework
+django-cors-headers
