@@ -75,7 +75,7 @@
                 <h5>Tags:</h5>
                 <p>
                     {% for tag in scammer.tags.all %}
-                        <a href="{% url 'scammer_list' %}?q=tag:{{ tag.name }}" class="badge bg-primary text-decoration-none">{{ tag.name }}</a>
+                        <a href="{% url 'scammer_list' %}?search_field=tag&q={{ tag.name }}" class="badge bg-primary text-decoration-none">{{ tag.name }}</a>
                     {% endfor %}
                 </p>
                 {% endif %}
