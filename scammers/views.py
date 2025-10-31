@@ -1,59 +1,48 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from .documents import ScammerDocument, ScammerProfileDocument
 
 from django.db import transaction
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q
+from elasticsearch_dsl.query import Q
 from .models import Scammer, ScammerName, ScammerPhoneNumber, ScammerEmail, ScammerWebsite, ScammerImage, Tag, ScammerProfile
 from .forms import ScammerForm, ScammerNameFormSet, ScammerPhoneNumberFormSet, ScammerEmailFormSet, ScammerWebsiteFormSet, ScammerImageFormSet, ScammerPaymentAccountFormSet, ScammerProfileForm
 
 
 from django.core.paginator import Paginator
 
-
 def scammer_list(request):
     query = request.GET.get('q', '')
     search_field = request.GET.get('search_field', 'all')
     
-    # Start with an empty queryset
-    scammers_list = Scammer.objects.none()
-
     if query:
-        # Perform search on Scammer model
-        scammer_q = Scammer.objects.filter(status='approved')
         if search_field == 'name':
-            scammer_q = scammer_q.filter(names__name__icontains=query)
+            s = ScammerDocument.search().query("nested", path="names", query=Q("match", **{"names.name": {"query": query, "analyzer": "edge_ngram_analyzer"}}))
         elif search_field == 'phone':
-            query_no_leading_zeros = query.lstrip('0')
-            scammer_q = scammer_q.filter(phone_numbers__phone_number__icontains=query_no_leading_zeros)
+            s = ScammerDocument.search().query("nested", path="phone_numbers", query=Q("match", phone_numbers__phone_number=query))
         elif search_field == 'email':
-            scammer_q = scammer_q.filter(emails__email__icontains=query)
+            s = ScammerDocument.search().query("nested", path="emails", query=Q("match", emails__email=query))
         elif search_field == 'website':
-            scammer_q = scammer_q.filter(websites__website__icontains=query)
+            s = ScammerDocument.search().query("nested", path="websites", query=Q("match", websites__website=query))
         elif search_field == 'tag':
-            scammer_q = scammer_q.filter(tags__name__icontains=query)
+            s = ScammerDocument.search().query("nested", path="tags", query=Q("match", tags__name=query))
         else: # 'all'
-            phone_query_no_leading_zeros = query.lstrip('0')
-            scammer_q = scammer_q.filter(
-                Q(names__name__icontains=query) |
-                Q(description__icontains=query) |
-                Q(phone_numbers__phone_number__icontains=phone_query_no_leading_zeros) |
-                Q(emails__email__icontains=query) |
-                Q(websites__website__icontains=query) |
-                Q(tags__name__icontains=query)
+            s = ScammerDocument.search().query(
+                "bool",
+                should=[
+                    Q("nested", path="names", query=Q("match", **{"names.name": {"query": query, "analyzer": "edge_ngram_analyzer"}})),
+                    Q("match", description=query),
+                    Q("nested", path="phone_numbers", query=Q("match", phone_numbers__phone_number=query)),
+                    Q("nested", path="emails", query=Q("match", emails__email=query)),
+                    Q("nested", path="websites", query=Q("match", websites__website=query)),
+                    Q("nested", path="tags", query=Q("match", tags__name=query)),
+                ]
             )
         
-        # Perform search on ScammerProfile model
-        profile_q = ScammerProfile.objects.filter(name__icontains=query)
-        
-        # Get cases from matching profiles
-        profile_scammers = Scammer.objects.filter(profiles__in=profile_q, status='approved')
-        
-        # Combine the querysets and remove duplicates
-        scammers_list = (scammer_q | profile_scammers).distinct().order_by('-approved_at')
-
+        scammers_list = s.to_queryset()
     else:
         scammers_list = Scammer.objects.filter(status='approved').order_by('-approved_at')
+
 
 
     paginator = Paginator(scammers_list, 9) # 9 items per page
@@ -343,6 +332,13 @@ class ScammerProfileListView(ListView):
     template_name = 'scammers/scammer_profile_list.html'
     context_object_name = 'profiles'
     paginate_by = 9
+
+    def get_queryset(self):
+        query = self.request.GET.get('q', '')
+        if query:
+            s = ScammerProfileDocument.search().query("match", **{"name": {"query": query, "analyzer": "edge_ngram_analyzer"}})
+            return s.to_queryset()
+        return ScammerProfile.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

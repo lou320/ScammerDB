@@ -31,13 +31,13 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure--9*vdasl^lwsqv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'scammerdb.website').split(',')
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 
 # Security settings for production
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', 'https://scammerdb.website').split(',')
 
 
 # Logging configuration for production
@@ -72,7 +72,29 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'api',
+    'django_elasticsearch_dsl',
 ]
+
+ELASTICSEARCH_HOSTS = os.environ.get('ELASTICSEARCH_HOSTS', None)
+
+if ELASTICSEARCH_HOSTS:
+    ELASTICSEARCH_DSL = {
+        'default': {
+            'hosts': ELASTICSEARCH_HOSTS.split(','),
+            'http_auth': os.environ.get('ELASTICSEARCH_HTTP_AUTH'),
+            'verify_certs': True,
+            'ca_certs': os.environ.get('ELASTICSEARCH_CA_CERTS'),
+        }
+    }
+else:
+    ELASTICSEARCH_DSL = {
+        'default': {
+            'hosts': ['https://localhost:9200'],
+            'http_auth': ('elastic', 'vvw7inJV*CWdbXd93fWp'),
+            'verify_certs': False,
+        }
+    }
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
