@@ -29,6 +29,8 @@ class ScammerDocument(Document):
     tags = fields.NestedField(properties={
         'name': fields.TextField(),
     })
+    status = fields.TextField()
+    approved_at = fields.DateField()
 
     class Index:
         name = 'scammers'

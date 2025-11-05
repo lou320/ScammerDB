@@ -43,9 +43,10 @@ def scammer_list(request):
             )
         
         s = s.query(q)
-        scammers_list = s.to_queryset()
-    else:
-        scammers_list = Scammer.objects.filter(status='approved').order_by('-approved_at')
+
+    # Sort by approved_at descending
+    s = s.sort('-approved_at')
+    scammers_list = s.to_queryset()
 
 
 
