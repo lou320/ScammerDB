@@ -78,23 +78,17 @@ INSTALLED_APPS = [
 ELASTICSEARCH_HOSTS = os.environ.get('ELASTICSEARCH_HOSTS', None)
 
 if ELASTICSEARCH_HOSTS:
-    hosts = ELASTICSEARCH_HOSTS.split(',')
-    use_ssl = all(host.startswith('https') for host in hosts)
-
     ELASTICSEARCH_DSL = {
         'default': {
-            'hosts': hosts,
+            'hosts': ELASTICSEARCH_HOSTS.split(','),
             'http_auth': os.environ.get('ELASTICSEARCH_HTTP_AUTH'),
-            'verify_certs': False,
-            'ca_certs': None,
         }
     }
 else:
     ELASTICSEARCH_DSL = {
         'default': {
-            'hosts': ['https://localhost:9200'],
+            'hosts': ['http://localhost:9200'],
             'http_auth': ('elastic', 'vvw7inJV*CWdbXd93fWp'),
-            'verify_certs': False,
         }
     }
 
