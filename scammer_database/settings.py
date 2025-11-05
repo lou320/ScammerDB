@@ -77,6 +77,8 @@ INSTALLED_APPS = [
 
 ELASTICSEARCH_HOSTS = os.environ.get('ELASTICSEARCH_HOSTS', None)
 
+print(f"ELASTICSEARCH_HOSTS: {os.environ.get('ELASTICSEARCH_HOSTS')}")
+
 if ELASTICSEARCH_HOSTS:
     ELASTICSEARCH_DSL = {
         'default': {
