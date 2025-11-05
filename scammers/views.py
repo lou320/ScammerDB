@@ -15,19 +15,22 @@ def scammer_list(request):
     query = request.GET.get('q', '')
     search_field = request.GET.get('search_field', 'all')
     
+    # Base search with status filter
+    s = ScammerDocument.search().filter("term", status='approved')
+
     if query:
         if search_field == 'name':
-            s = ScammerDocument.search().query("nested", path="names", query=Q("match", **{"names.name": {"query": query, "analyzer": "edge_ngram_analyzer"}}))
+            q = Q("nested", path="names", query=Q("match", **{"names.name": {"query": query, "analyzer": "edge_ngram_analyzer"}}))
         elif search_field == 'phone':
-            s = ScammerDocument.search().query("nested", path="phone_numbers", query=Q("match", phone_numbers__phone_number=query))
+            q = Q("nested", path="phone_numbers", query=Q("match", phone_numbers__phone_number=query))
         elif search_field == 'email':
-            s = ScammerDocument.search().query("nested", path="emails", query=Q("match", emails__email=query))
+            q = Q("nested", path="emails", query=Q("match", emails__email=query))
         elif search_field == 'website':
-            s = ScammerDocument.search().query("nested", path="websites", query=Q("match", websites__website=query))
+            q = Q("nested", path="websites", query=Q("match", websites__website=query))
         elif search_field == 'tag':
-            s = ScammerDocument.search().query("nested", path="tags", query=Q("match", tags__name=query))
+            q = Q("nested", path="tags", query=Q("match", tags__name=query))
         else: # 'all'
-            s = ScammerDocument.search().query(
+            q = Q(
                 "bool",
                 should=[
                     Q("nested", path="names", query=Q("match", **{"names.name": {"query": query, "analyzer": "edge_ngram_analyzer"}})),
@@ -39,6 +42,7 @@ def scammer_list(request):
                 ]
             )
         
+        s = s.query(q)
         scammers_list = s.to_queryset()
     else:
         scammers_list = Scammer.objects.filter(status='approved').order_by('-approved_at')
