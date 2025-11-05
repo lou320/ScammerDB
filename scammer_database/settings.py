@@ -77,6 +77,8 @@ INSTALLED_APPS = [
 
 ELASTICSEARCH_HOSTS = os.environ.get('ELASTICSEARCH_HOSTS', None)
 
+import certifi
+
 if ELASTICSEARCH_HOSTS:
     hosts = ELASTICSEARCH_HOSTS.split(',')
     use_ssl = all(host.startswith('https') for host in hosts)
@@ -86,7 +88,7 @@ if ELASTICSEARCH_HOSTS:
             'hosts': hosts,
             'http_auth': os.environ.get('ELASTICSEARCH_HTTP_AUTH'),
             'verify_certs': use_ssl,
-            'ca_certs': os.environ.get('ELASTICSEARCH_CA_CERTS'),
+            'ca_certs': certifi.where(),
         }
     }
 else:
