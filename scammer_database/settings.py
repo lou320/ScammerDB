@@ -78,16 +78,17 @@ INSTALLED_APPS = [
 ELASTICSEARCH_HOSTS = os.environ.get('ELASTICSEARCH_HOSTS', None)
 
 if ELASTICSEARCH_HOSTS:
+    hosts = ELASTICSEARCH_HOSTS.split(',')
+    use_ssl = all(host.startswith('https') for host in hosts)
+
     ELASTICSEARCH_DSL = {
         'default': {
-            'hosts': ELASTICSEARCH_HOSTS.split(','),
+            'hosts': hosts,
             'http_auth': os.environ.get('ELASTICSEARCH_HTTP_AUTH'),
-            'verify_certs': True,
+            'verify_certs': use_ssl,
             'ca_certs': os.environ.get('ELASTICSEARCH_CA_CERTS'),
         }
     }
-elif not DEBUG:
-    raise ValueError("ELASTICSEARCH_HOSTS environment variable must be set in production.")
 else:
     ELASTICSEARCH_DSL = {
         'default': {
