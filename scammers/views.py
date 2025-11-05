@@ -46,9 +46,13 @@ def scammer_list(request):
 
     # Sort by approved_at descending
     s = s.sort('-approved_at')
+    
+    # Get the total count and slice the search to get all results
+    # This is necessary because the default ES query size is 10
+    total_count = s.count()
+    s = s[0:total_count]
+    
     scammers_list = s.to_queryset()
-
-
 
     paginator = Paginator(scammers_list, 9) # 9 items per page
     page_number = request.GET.get('page')
