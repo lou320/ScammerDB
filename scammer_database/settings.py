@@ -86,6 +86,8 @@ if ELASTICSEARCH_HOSTS:
             'ca_certs': os.environ.get('ELASTICSEARCH_CA_CERTS'),
         }
     }
+elif not DEBUG:
+    raise ValueError("ELASTICSEARCH_HOSTS environment variable must be set in production.")
 else:
     ELASTICSEARCH_DSL = {
         'default': {
