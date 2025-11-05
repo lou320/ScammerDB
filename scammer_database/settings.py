@@ -80,10 +80,14 @@ ELASTICSEARCH_HOSTS = os.environ.get('ELASTICSEARCH_HOSTS', None)
 print(f"ELASTICSEARCH_HOSTS: {os.environ.get('ELASTICSEARCH_HOSTS')}")
 
 if ELASTICSEARCH_HOSTS:
+    http_auth = os.environ.get('ELASTICSEARCH_HTTP_AUTH')
+    if http_auth:
+        http_auth = tuple(http_auth.split(':'))
+
     ELASTICSEARCH_DSL = {
         'default': {
             'hosts': ELASTICSEARCH_HOSTS.split(','),
-            'http_auth': os.environ.get('ELASTICSEARCH_HTTP_AUTH'),
+            'http_auth': http_auth,
         }
     }
 else:
