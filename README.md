@@ -13,38 +13,35 @@ This platform allows users to safely log and verify reports, helping to prevent 
 ## 🛠️ Tech Stack
 * **Backend:** Python, Django
 * **Frontend:** HTML, CSS, JavaScript (Template rendering)
-* **Database:** SQLite / PostgreSQL (Configure in `settings.py`)
+* **Database:** SQLite / PostgreSQL (Configure in settings.py)
 
 ## ⚙️ Local Installation & Setup
 
 If you want to run this project locally, follow these steps:
 
 1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/lou320/ScammerDB.git](https://github.com/lou320/ScammerDB.git)
-   cd ScammerDB
-Create a virtual environment (Recommended):
+    git clone [https://github.com/lou320/ScammerDB.git](https://github.com/lou320/ScammerDB.git)
+    cd ScammerDB
 
-Bash
-python -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
-Install dependencies:
+2. **Create a virtual environment (Recommended):**
+    python -m venv venv
+    source venv/bin/activate  # On Windows use: venv\Scripts\activate
 
-Bash
-pip install -r requirements.txt
-Apply database migrations:
+3. **Install dependencies:**
+    pip install -r requirements.txt
 
-Bash
-python manage.py migrate
-Run the development server:
+4. **Apply database migrations:**
+    python manage.py migrate
 
-Bash
-python manage.py runserver
-The application will be available at http://127.0.0.1:8000/
+5. **Run the development server:**
+    python manage.py runserver
 
-📈 Future Roadmap
-Implement user authentication for verified reporting.
+   *The application will be available at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)*
 
-Add an API endpoint for third-party integrations.
+## 📈 Future Roadmap
+* Implement user authentication for verified reporting.
+* Add an API endpoint for third-party integrations.
+* Integrate automated OSINT tools to verify scammer details.
 
-Integrate automated OSINT tools to verify scammer details.
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page on the GitHub repository.
